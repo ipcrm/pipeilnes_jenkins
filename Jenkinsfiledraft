@@ -14,7 +14,7 @@ def PIPEILNES_BUILD_EVENT_ID = ''
 
 node('pipelines') {
   checkout scm
-  echo env
+  echo sh(script: 'env|sort', returnStdout: true)
   def DISTELLI_CHANGE_TITLE = sh(returnStdout: true, script: 'git --no-pager log --pretty=format:"%s" -1')
   def DISTELLI_BUILD_ID = env.BUILD_NUMBER
   def DISTELLI_BUILD_URL= env.BUILD_URL
