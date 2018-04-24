@@ -1,0 +1,5 @@
+ipcrm/pipeilnes_jenkins:
+  Build:
+    - echo 'Built via Jenkins'
+  PkgInclude:
+    - artifact
