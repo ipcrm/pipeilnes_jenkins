@@ -44,7 +44,6 @@ node('pipelines') {
   stage('Create Build Event'){
     try {
       def DISTELLI_NOW = sh(returnStdout: true, script: 'date -u +%Y-%m-%dT%H:%M:%S.0Z').trim()
-      echo 'IAMHERE'
       def data = [:]
       data["build_status"] = 'running'
       data["build_start"] = DISTELLI_NOW
@@ -59,6 +58,8 @@ node('pipelines') {
       data["commit_id"] = DISTELLI_CHANGE_ID
       data["branch"] = DISTELLI_BRANCH_NAME
       data["parent_event_id"] = PIPELINES_EVENT_ID
+
+      echo 'IAMHERE'
       
       def pipeargs = "apps/${DISTELLI_APP_NAME}/events/buildEvent?apiToken=${PIPELINES_API_TOKEN}"
       echo 'I am here - 1'
