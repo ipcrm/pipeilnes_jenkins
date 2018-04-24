@@ -5,11 +5,7 @@ import groovy.json.JsonSlurper
 def DISTELLI_USERNAME = 'ipcrm'
 def DISTELLI_API_URL  = "https://api.distelli.com/$DISTELLI_USERNAME"
 def DISTELLI_APP_NAME = "pipeilnes_jenkins"
-
-PIPELINES_API_TOKEN='ibmmox8a2mspxs5lzh3ozhwe9xyq0smslsmmg' //BAD!
-
-def PIPELINES_PUSH_EVENT_ID = ''
-def PIPELINES_BUILD_EVENT_ID = ''
+def PIPELINES_API_TOKEN='ibmmox8a2mspxs5lzh3ozhwe9xyq0smslsmmg' //BAD!
 
 node(pipelines) {
   checkout(scm).each { k,v -> env.setProperty(k, v) }
