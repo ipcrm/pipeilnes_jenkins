@@ -60,7 +60,7 @@ node('pipelines') {
       data["parent_event_id"] = PIPEILNES_EVENT_ID
       
       def pipeargs = "apps/${DISTELLI_APP_NAME}/events/buildEvent?apiToken=${PIPELINES_API_TOKEN}"
-      PIPEILNES_BUILD_EVENT_ID = pushData('PUT',DISTELLI_API_URL,pipeargs,data)['event_id']
+      PIPELINES_BUILD_EVENT_ID = pushData('PUT',DISTELLI_API_URL,pipeargs,data)['event_id']
 
       // Customer Code
       //  Compile XYZ
