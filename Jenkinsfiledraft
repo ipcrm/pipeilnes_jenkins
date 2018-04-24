@@ -94,13 +94,13 @@ def pushData (method,baseurl,args,payload) {
 
 //Main
 node('pipelines') {
+  checkout(scm).each { k,v -> env.setProperty(k, v) }
   def DISTELLI_USERNAME = 'ipcrm'
   def DISTELLI_API_URL  = "https://api.distelli.com/$DISTELLI_USERNAME"
   def DISTELLI_APP_NAME = "pipeilnes_jenkins"
   def PIPELINES_API_TOKEN ='ibmmox8a2mspxs5lzh3ozhwe9xyq0smslsmmg' //BAD!
   set_env_stuff()
 
-  checkout(scm).each { k,v -> env.setProperty(k, v) }
   stage('build stuff'){
     try {
         create_push_event()
