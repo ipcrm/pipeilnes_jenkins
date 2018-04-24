@@ -11,8 +11,10 @@ PIPELINES_API_TOKEN='ibmmox8a2mspxs5lzh3ozhwe9xyq0smslsmmg' //BAD!
 def PIPEILNES_PUSH_EVENT_ID = ''
 def PIPEILNES_BUILD_EVENT_ID = ''
 
+
 node('pipelines') {
   checkout scm
+  echo env
   def DISTELLI_CHANGE_TITLE = sh(returnStdout: true, script: 'git --no-pager log --pretty=format:"%s" -1')
   def DISTELLI_BUILD_ID = env.BUILD_NUMBER
   def DISTELLI_BUILD_URL= env.BUILD_URL
