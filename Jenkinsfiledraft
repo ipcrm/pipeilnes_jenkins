@@ -14,7 +14,7 @@ def PIPEILNES_BUILD_EVENT_ID = ''
 
 node('pipelines') {
   checkout(scm).each { k,v -> env.setProperty(k, v) }
-  appendEnvironment()
+  env.GIT_AUTHOR_NAME = sh(returnStdout: true, "git --no-pager show -s --format='%an'").trim()
   echo sh(script: 'env|sort', returnStdout: true)
   def DISTELLI_CHANGE_TITLE = sh(returnStdout: true, script: 'git --no-pager log --pretty=format:"%s" -1')
   def DISTELLI_BUILD_ID = env.BUILD_NUMBER
@@ -114,25 +114,4 @@ def pushData (method,baseurl,args,payload) {
   } catch (Exception e) {
     throw e
   }
-}
-
-def appendEnvironment() {
-    // https://gist.github.com/KekSfabrik/fae3845c506b78a5341a739a667327e8
-    /*
-        Workaround for GIT plugin, if unset, set manually here:
-     */
-    if (!env.GIT_BRANCH)
-        env.GIT_BRANCH = git('rev-parse --abbrev-ref HEAD').trim()
-    if (!env.GIT_COMMIT)
-        env.GIT_COMMIT = git('rev-parse HEAD').trim()
-    if (!env.GIT_URL)
-        env.GIT_URL = git('config --get remote.origin.url').trim()
-    if (!env.GIT_COMMITTER_NAME || env.GIT_AUTHOR_NAME) {
-        env.GIT_AUTHOR_NAME = git("show -s --format='%an'").trim()
-        env.GIT_COMMITTER_NAME = env.GIT_AUTHOR_NAME
-    }
-    if (!env.GIT_COMMITTER_EMAIL || env.GIT_AUTHOR_EMAIL) {
-        env.GIT_AUTHOR_EMAIL = git("show -s --format='%ae'").trim()
-        env.GIT_COMMITTER_EMAIL = env.GIT_AUTHOR_EMAIL
-    }
 }
