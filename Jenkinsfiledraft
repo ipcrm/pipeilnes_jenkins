@@ -1,4 +1,7 @@
-#!groovy::
+#!groovy
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+
 def DISTELLI_USERNAME=ipcrm
 def DISTELLI_API_URL="https://api.distelli.com/$DISTELLI_USERNAME"
 def DISTELLI_APP_NAME="pipelines_jenkins"
@@ -56,7 +59,7 @@ node('pipelines') {
         data["parent_event_id"] = PIPEILNES_EVENT_ID
         
         def pipeargs = "/apps/${DISTELLI_APP_NAME}/events/buildEvent?apiToken=${PIPELINES_API_TOKEN}"
-        def PIPEILNES_BUILD_EVENT_ID = pushData('PUT',DISTELLI_API_URL,pipeargs,data)['event_id']
+        PIPEILNES_BUILD_EVENT_ID = pushData('PUT',DISTELLI_API_URL,pipeargs,data)['event_id']
 
         // Customer Code
         //  Compile XYZ
@@ -65,7 +68,7 @@ node('pipelines') {
         // End of Customer Code
 
         sh('distelli push -save-release release_version.out')
-        def DISTELLI_NOW = sh(returnStdout: true, script: 'date -u +%Y-%m-%dT%H:%M:%S.0Z')
+        DISTELLI_NOW = sh(returnStdout: true, script: 'date -u +%Y-%m-%dT%H:%M:%S.0Z')
 
         def eventdata = [:]
         eventdata['build_status'] = 'Succeeded'
