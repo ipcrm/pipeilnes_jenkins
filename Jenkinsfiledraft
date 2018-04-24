@@ -11,9 +11,29 @@ PIPELINES_API_TOKEN='ibmmox8a2mspxs5lzh3ozhwe9xyq0smslsmmg' //BAD!
 def PIPELINES_PUSH_EVENT_ID = ''
 def PIPELINES_BUILD_EVENT_ID = ''
 
-
-node('pipelines') {
+node(pipelines) {
   checkout(scm).each { k,v -> env.setProperty(k, v) }
+  stage('build stuff'){
+    try {
+      step {
+        set_env_stuff()
+        create_push_event()
+        def build_id = create_build_event
+
+        // COMPILE/PACKAGE/WHATEVER
+        sh('distelli push -save-release release_version.out')
+        // END Compile
+
+        update_build_status(build_id,'Success')
+      }
+    } catch (all) {
+
+    }
+
+  }
+}
+
+def set_env_stuff() {
   env.GIT_AUTHOR_NAME = sh(returnStdout: true, script: "git --no-pager show -s --format='%an'").trim()
   def DISTELLI_CHANGE_TITLE = sh(returnStdout: true, script: 'git --no-pager log --pretty=format:"%s" -1')
   def DISTELLI_BUILD_ID = env.BUILD_NUMBER
@@ -24,24 +44,28 @@ node('pipelines') {
   def DISTELLI_BRANCH_NAME = env.GIT_BRANCH.split('/')[1]
   def DISTELLI_CHANGE_TARGET = env.GIT_URL
   def DISTELLI_CHANGE_URL = "${env.GIT_URL}/commits/${DISTELLI_CHANGE_ID}"
+}
 
-  try {
-    stage('Create Push Event'){
-      def pipeargs = "apps/${DISTELLI_APP_NAME}/events/pushEvent?apiToken=${PIPELINES_API_TOKEN}"
-      def data = [:]
-      data['author_username'] = DISTELLI_CHANGE_AUTHOR
-      data['author_name'] = DISTELLI_CHANGE_AUTHOR_DISPLAY_NAME
-      data['commit_msg'] = DISTELLI_CHANGE_TITLE 
-      data['commit_url'] = DISTELLI_CHANGE_URL
-      data['repo_url']  = DISTELLI_CHANGE_TARGET
-      data['commit_id'] = DISTELLI_CHANGE_ID 
-      data['repo_owner'] = 'ipcrm' 
-      data['repo_name'] = 'pipelines_jenkins'
-      data['branch'] = DISTELLI_BRANCH_NAME
+def create_push_event(){
+  stage('Create Push Event'){
+    set_env_stuff()
+    def pipeargs = "apps/${DISTELLI_APP_NAME}/events/pushEvent?apiToken=${PIPELINES_API_TOKEN}"
+    def data = [:]
+    data['author_username'] = DISTELLI_CHANGE_AUTHOR
+    data['author_name'] = DISTELLI_CHANGE_AUTHOR_DISPLAY_NAME
+    data['commit_msg'] = DISTELLI_CHANGE_TITLE 
+    data['commit_url'] = DISTELLI_CHANGE_URL
+    data['repo_url']  = DISTELLI_CHANGE_TARGET
+    data['commit_id'] = DISTELLI_CHANGE_ID 
+    data['repo_owner'] = 'ipcrm' 
+    data['repo_name'] = 'pipelines_jenkins'
+    data['branch'] = DISTELLI_BRANCH_NAME
 
-      PIPELINES_PUSH_EVENT_ID = pushData('PUT',DISTELLI_API_URL,pipeargs,data)['event_id']
-    }
+    return pushData('PUT',DISTELLI_API_URL,pipeargs,data)['event_id']
+  }
+}
 
+def create_build_event(){
     stage('Create Build Event'){
         def DISTELLI_NOW = sh(returnStdout: true, script: 'date -u +%Y-%m-%dT%H:%M:%S.0Z').trim()
         def builddata = [:]
@@ -57,49 +81,24 @@ node('pipelines') {
         builddata["commit_msg"] = DISTELLI_CHANGE_TITLE
         builddata["commit_id"] = DISTELLI_CHANGE_ID
         builddata["branch"] = DISTELLI_BRANCH_NAME
-        builddata["parent_event_id"] = PIPELINES_PUSH_EVENT_ID
-        
-        def pipeargs = "apps/${DISTELLI_APP_NAME}/events/buildEvent?apiToken=${PIPELINES_API_TOKEN}"
-        PIPELINES_BUILD_EVENT_ID = pushData('PUT',DISTELLI_API_URL,pipeargs,builddata)['event_id']
-    }
-
-    stage('Customer Code') {
-        // Customer Code
-        //  Compile XYZ
-        //  Package XYZ
-        //  - Distelli Manifest, PkgInclude: *XYZ Artifacts*
-        // End of Customer Code
-
-        sh('distelli push -save-release release_version.out')
-    }
-
-    stage('Update Build Status') {
-
-        DISTELLI_NOW = sh(returnStdout: true, script: 'date -u +%Y-%m-%dT%H:%M:%S.0Z').trim()
-
-        def eventdata = [:]
-        eventdata['build_status'] = 'Success'
-        eventdata['build_end'] = DISTELLI_NOW
-        eventdata['release_version'] = sh(returnStdout: true, script:'cat release_version.out').trim()
-
-        def eventargs = "apps/${DISTELLI_APP_NAME}/events/${PIPELINES_BUILD_EVENT_ID}?apiToken=${PIPELINES_API_TOKEN}"
-        pushData('POST',DISTELLI_API_URL,eventargs,eventdata)
-    }
-
-  } catch (all) {
-        def DISTELLI_NOW = sh(returnStdout: true, script: 'date -u +%Y-%m-%dT%H:%M:%S.0Z').trim()
-
-        def eventdata = [:]
-        eventdata['build_status'] = 'Failed'
-        eventdata['build_end'] = DISTELLI_NOW
-
-        def eventargs = "apps/${DISTELLI_APP_NAME}/events/${PIPELINES_BUILD_EVENT_ID}?apiToken=${PIPELINES_API_TOKEN}"
-        pushData('POST',DISTELLI_API_URL,eventargs,eventdata)
-
-        error('Failed to build!')
+      builddata["parent_event_id"] = PIPELINES_PUSH_EVENT_ID
+      
+      def pipeargs = "apps/${DISTELLI_APP_NAME}/events/buildEvent?apiToken=${PIPELINES_API_TOKEN}"
+      return pushData('PUT',DISTELLI_API_URL,pipeargs,builddata)['event_id']
   }
 }
 
+def update_build_status(build_event_id,status){
+  DISTELLI_NOW = sh(returnStdout: true, script: 'date -u +%Y-%m-%dT%H:%M:%S.0Z').trim()
+
+  def eventdata = [:]
+  eventdata['build_status'] = status
+  eventdata['build_end'] = DISTELLI_NOW
+  eventdata['release_version'] = sh(returnStdout: true, script:'cat release_version.out').trim()
+
+  def eventargs = "apps/${DISTELLI_APP_NAME}/events/${build_event_id}?apiToken=${PIPELINES_API_TOKEN}"
+  pushData('POST',DISTELLI_API_URL,eventargs,eventdata)
+}
 def pushData (method,baseurl,args,payload) {
   def jsonSlurper = new JsonSlurper()
   try {
@@ -109,8 +108,6 @@ def pushData (method,baseurl,args,payload) {
     post.setDoOutput(true)
     post.setRequestProperty("Content-Type", "application/json")
     post.getOutputStream().write(JsonOutput.toJson(payload).getBytes("UTF-8"));
-    echo JsonOutput.toJson(payload)
-    echo fullurl
     def postRC = post.getResponseCode();
     if(postRC.equals(200)) {
       def object = jsonSlurper.parseText(post.getInputStream().getText());
