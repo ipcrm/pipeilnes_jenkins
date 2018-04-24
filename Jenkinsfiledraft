@@ -60,9 +60,11 @@ node('pipelines') {
       data["parent_event_id"] = PIPELINES_EVENT_ID
       
       def pipeargs = "apps/${DISTELLI_APP_NAME}/events/buildEvent?apiToken=${PIPELINES_API_TOKEN}"
-      TESTID = pushData('PUT',DISTELLI_API_URL,pipeargs,data)
+      echo 'I am here - 1'
+      def TESTID = pushData('PUT',DISTELLI_API_URL,pipeargs,data)
       echo TESTID
       PIPELINES_BUILD_EVENT_ID = TESTID['event_id']
+      echo 'I am here - 2'
 
       // Customer Code
       //  Compile XYZ
@@ -70,8 +72,11 @@ node('pipelines') {
       //  - Distelli Manifest, PkgInclude: *XYZ Artifacts*
       // End of Customer Code
 
-      sh('distelli push -save-release release_version.out')
+      sh('distelli push -save-release release_version.out && cat release_version.out')
+      echo 'I am here - 3'
       DISTELLI_NOW = sh(returnStdout: true, script: 'date -u +%Y-%m-%dT%H:%M:%S.0Z').trim()
+      echo 'I am here - 4'
+
 
       def eventdata = [:]
       eventdata['build_status'] = 'Succeeded'
