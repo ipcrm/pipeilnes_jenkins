@@ -1,236 +1,159 @@
 #!groovy::
 def DISTELLI_USERNAME=ipcrm
 def DISTELLI_API_URL="https://api.distelli.com/$DISTELLI_USERNAME"
-def DISTELLI_APP_NAME="sparkjava-puppet-webapp"
+def DISTELLI_APP_NAME="pipelines_jenkins"
 def DISTELLI_CI_PROVIDER="jenkins"
 def DISTELLI_BUILD_STATUS="Running"
 //git variables
-def DISTELLI_BUILD_ID=$BUILD_NUMBER
-def DISTELLI_BUILD_URL=$BUILD_URL
-def DISTELLI_CHANGE_URL=$GIT_URL
-def DISTELLI_CHANGE_AUTHOR=$GIT_AUTHOR_NAME
-def DISTELLI_CHANGE_AUTHOR_DISPLAY_NAME=$GIT_AUTHOR_NAME
-def DISTELLI_CHANGE_TITLE= '' $(git --no-pager log --pretty=format:"%s" -1)
-def DISTELLI_CHANGE_ID=$GIT_COMMIT
-def DISTELLI_BRANCH_NAME=$GIT_BRANCH
-def DISTELLI_CHANGE_TARGET=$GIT_URL
+def DISTELLI_BUILD_ID=env.BUILD_NUMBER
+def DISTELLI_BUILD_URL=env.BUILD_URL
+def DISTELLI_CHANGE_URL=env.GIT_URL
+def DISTELLI_CHANGE_AUTHOR=env.GIT_AUTHOR_NAME
+def DISTELLI_CHANGE_AUTHOR_DISPLAY_NAME=env.GIT_AUTHOR_NAME
+def DISTELLI_CHANGE_ID=env.GIT_COMMIT
+def DISTELLI_BRANCH_NAME=env.GIT_BRANCH
+def DISTELLI_CHANGE_TARGET=env.GIT_URL
+def PIPELINES_API_TOKEN='XXXX'
 
-node('spark-puppet-webapp') {
-  sshagent (credentials: ['##NEED #jenkins-seteam-ssh']) {
-    withEnv(['PATH+EXTRA=/usr/local/bin']) {
-      checkout scm
+def PIPEILNES_EVENT_ID = ''
 
-      //stage('Setup'){
-      //  ansiColor('xterm') {
-      //    loadenv()
-      //    loadgitspecific()
-      //  }
-      //}
 
-      stage('Create Push Event'){
-        ansiColor('xterm') {
-          sh(script: '''
+node('pipelines') {
+  def DISTELLI_CHANGE_TITLE = sh(returnStdout: true, script: 'git --no-pager log --pretty=format:"%s" -1'
+  withEnv(['PATH+EXTRA=/usr/local/bin']) {
+    checkout scm
+    stage('Create Push Event'){
+      def pipeargs = "/apps/${DISTELLI_APP_NAME}/events/pushEvent?apiToken=${PIPELINES_API_TOKEN}"
+      def data = [:]
+      data['author_username'] = DISTELLI_CHANGE_AUTHOR
+      data['author_name'] = DISTELLI_CHANGE_AUTHOR_DISPLAY_NAME
+      data['commit_msg'] = DISTELLI_CHANGE_TITLE 
+      data['commit_url'] = DISTELLI_CHANGE_URL
+      data['commit_id'] = DISTELLI_CHANGE_ID 
+      data['repo_url'] = DISTELLI_CHANGE_TARGET
+      data['branch'] = DISTELLI_BRANCH_NAME
+
+      PIPEILNES_EVENT_ID = pushData('PUT',DISTELLI_API_URL,pipeargs,data)['event_id']
+    }
+
+    stage('Create Build Event'){
+      try {
+        sh(script: '''
           ##REPLACE
-            API_JSON=$(printf '{"commit_url":%s, "author_username":%s, "author_name":%s, "commit_msg":%s, "commit_id":%s, "branch":%s, "repo_url":%s}' \
-              "$(jq -R . <<<"$DISTELLI_CHANGE_URL")" \
-              "$(jq -R . <<<"$DISTELLI_CHANGE_AUTHOR")" \
-              "$(jq -R . <<<"$DISTELLI_CHANGE_AUTHOR_DISPLAY_NAME")" \
-              "$(jq -R . <<<"$DISTELLI_CHANGE_TITLE")" \
-              "$(jq -R . <<<"$DISTELLI_CHANGE_ID")" \
-              "$(jq -R . <<<"$DISTELLI_BRANCH_NAME")" \
-              "$(jq -R . <<<"$DISTELLI_CHANGE_TARGET")")
-
-            DISTELLI_RESPONSE=$(curl -s -k -X PUT -H "Content-Type: application/json" "$DISTELLI_API_URL/apps/$DISTELLI_APP_NAME/events/pushEvent?apiToken=$PIPELINES_API_TOKEN" -d "$API_JSON")
-            DISTELLI_PUSH_EVENT_ID=$(echo $DISTELLI_RESPONSE | jq .event_id | tr -d '"')
-            echo -e "push_event_id: $DISTELLI_PUSH_EVENT_ID\n"
+          echo -e "\nCreating Distelli BUILD Event\n"
+          
+          DISTELLI_NOW=$(date -u +%Y-%m-%dT%H:%M:%S.0Z)
+          API_JSON=$(printf '{"build_status":%s, "build_start":%s, "build_id":%s, "build_provider":%s, "build_url":%s, "repo_url":%s, "commit_url":%s, "author_username":%s, "author_name":%s, "commit_msg":%s, "commit_id":%s, "branch":%s, "parent_event_id":%s}' \
+            "$(jq -R . <<<"$DISTELLI_BUILD_STATUS")" \
+            "$(jq -R . <<<"$DISTELLI_NOW")" \
+            "$(jq -R . <<<"$DISTELLI_BUILD_ID")" \
+            "$(jq -R . <<<"$DISTELLI_CI_PROVIDER")" \
+            "$(jq -R . <<<"$DISTELLI_BUILD_URL")" \
+            "$(jq -R . <<<"$DISTELLI_CHANGE_TARGET")" \
+            "$(jq -R . <<<"$DISTELLI_CHANGE_URL")" \
+            "$(jq -R . <<<"$DISTELLI_CHANGE_AUTHOR")" \
+            "$(jq -R . <<<"$DISTELLI_CHANGE_AUTHOR_DISPLAY_NAME")" \
+            "$(jq -R . <<<"$DISTELLI_CHANGE_TITLE")" \
+            "$(jq -R . <<<"$DISTELLI_CHANGE_ID")" \
+            "$(jq -R . <<<"$DISTELLI_BRANCH_NAME")" \
+            "$(jq -R . <<<"$DISTELLI_PUSH_EVENT_ID")")
+          
+          
+          DISTELLI_RESPONSE=$(curl -s -k -H "Content-Type: application/json" \
+            -X PUT "$DISTELLI_API_URL/apps/$DISTELLI_APP_NAME/events/buildEvent?apiToken=$PIPELINES_API_TOKEN" \
+            -d "$API_JSON")
+          
+          DISTELLI_BUILD_EVENT_ID=$(echo $DISTELLI_RESPONSE | jq .event_id | tr -d '"')
+          echo -e "build_event_id: $DISTELLI_BUILD_EVENT_ID\n\n"
+          
+          ##NEEDED???
+          # Saving build event id
+          DISTELLI_TMP_FILENAME="DISTELLI.$JOB_NAME.$BUILD_NUMBER.tmp"
+          echo "$DISTELLI_BUILD_EVENT_ID" > "$DISTELLI_TMP_FILENAME"
+          
+          ###############STARTING THE UPDATE TO SUCCESS BLOCK
+          DISTELLI_TMP_RELEASE="DISTELLIrelease.$JOB_NAME.$BUILD_NUMBER.tmp"
+          DISTELLI_RESPONSE=$(distelli push -save-release "$DISTELLI_TMP_RELEASE")
+          DISTELLI_RELEASE_VERSION=$(cat "$DISTELLI_TMP_RELEASE")
+          DISTELLI_RESPONSE=$(rm "$DISTELLI_TMP_RELEASE")
+          echo -e "Distelli Release Version: $DISTELLI_RELEASE_VERSION\n"
+          
+          # Setting global Distelli Env Variables
+          echo -e "\nSetting global Distelli environment variables\n"
+          DISTELLI_CI_PROVIDER="jenkins"
+          DISTELLI_BUILD_STATUS="Success"
+          
+          # Preparing to update the build event with "Success" and build end time
+          echo -e "\nPreparing to update build event in Distelli\n"
+          DISTELLI_NOW=$(date -u +%Y-%m-%dT%H:%M:%S.0Z)
+          DISTELLI_TMP_FILENAME="DISTELLI.$JOB_NAME.$BUILD_NUMBER.tmp"
+          DISTELLI_BUILD_EVENT_ID=$(cat "$DISTELLI_TMP_FILENAME")
+          DISTELLI_RESPONSE=$(rm "$DISTELLI_TMP_FILENAME")
+          
+          echo -e "Updating build event in Distelli\n"
+          # Updating build event with "Success" and build end time
+          API_JSON=$(printf '{"build_status":%s, "build_end":%s, "release_version":%s}' \
+            "$(jq -R . <<<"$DISTELLI_BUILD_STATUS")" \
+            "$(jq -R . <<<"$DISTELLI_NOW")" \
+            "$(jq -R . <<<"$DISTELLI_RELEASE_VERSION")")
+          
+          DISTELLI_RESPONSE=$(curl -s -k -H "Content-Type: application/json" \
+            -X POST "$DISTELLI_API_URL/apps/$DISTELLI_APP_NAME/events/$DISTELLI_BUILD_EVENT_ID?apiToken=$PIPELINES_API_TOKEN" \
+            -d "$API_JSON")
+          
+          echo -e "Distelli Build Update Response:\n $DISTELLI_RESPONSE\n\n"
           ''')
-        }
-      }
-
-      stage('Create Build Event'){
-        ansiColor('xterm') {
-          try {
+        } catch () {
             sh(script: '''
-              ##REPLACE
-              echo -e "\nCreating Distelli BUILD Event\n"
-              
-              DISTELLI_NOW=$(date -u +%Y-%m-%dT%H:%M:%S.0Z)
-              API_JSON=$(printf '{"build_status":%s, "build_start":%s, "build_id":%s, "build_provider":%s, "build_url":%s, "repo_url":%s, "commit_url":%s, "author_username":%s, "author_name":%s, "commit_msg":%s, "commit_id":%s, "branch":%s, "parent_event_id":%s}' \
-                "$(jq -R . <<<"$DISTELLI_BUILD_STATUS")" \
-                "$(jq -R . <<<"$DISTELLI_NOW")" \
-                "$(jq -R . <<<"$DISTELLI_BUILD_ID")" \
-                "$(jq -R . <<<"$DISTELLI_CI_PROVIDER")" \
-                "$(jq -R . <<<"$DISTELLI_BUILD_URL")" \
-                "$(jq -R . <<<"$DISTELLI_CHANGE_TARGET")" \
-                "$(jq -R . <<<"$DISTELLI_CHANGE_URL")" \
-                "$(jq -R . <<<"$DISTELLI_CHANGE_AUTHOR")" \
-                "$(jq -R . <<<"$DISTELLI_CHANGE_AUTHOR_DISPLAY_NAME")" \
-                "$(jq -R . <<<"$DISTELLI_CHANGE_TITLE")" \
-                "$(jq -R . <<<"$DISTELLI_CHANGE_ID")" \
-                "$(jq -R . <<<"$DISTELLI_BRANCH_NAME")" \
-                "$(jq -R . <<<"$DISTELLI_PUSH_EVENT_ID")")
-              
-              
-              DISTELLI_RESPONSE=$(curl -s -k -H "Content-Type: application/json" \
-                -X PUT "$DISTELLI_API_URL/apps/$DISTELLI_APP_NAME/events/buildEvent?apiToken=$PIPELINES_API_TOKEN" \
-                -d "$API_JSON")
-              
-              DISTELLI_BUILD_EVENT_ID=$(echo $DISTELLI_RESPONSE | jq .event_id | tr -d '"')
-              echo -e "build_event_id: $DISTELLI_BUILD_EVENT_ID\n\n"
-              
-              ##NEEDED???
-              # Saving build event id
-              DISTELLI_TMP_FILENAME="DISTELLI.$JOB_NAME.$BUILD_NUMBER.tmp"
-              echo "$DISTELLI_BUILD_EVENT_ID" > "$DISTELLI_TMP_FILENAME"
-              
-              ###############STARTING THE UPDATE TO SUCCESS BLOCK
+              # This script will update the Build status
+
               DISTELLI_TMP_RELEASE="DISTELLIrelease.$JOB_NAME.$BUILD_NUMBER.tmp"
-              DISTELLI_RESPONSE=$(distelli push -save-release "$DISTELLI_TMP_RELEASE")
-              DISTELLI_RELEASE_VERSION=$(cat "$DISTELLI_TMP_RELEASE")
-              DISTELLI_RESPONSE=$(rm "$DISTELLI_TMP_RELEASE")
-              echo -e "Distelli Release Version: $DISTELLI_RELEASE_VERSION\n"
-              
+
               # Setting global Distelli Env Variables
               echo -e "\nSetting global Distelli environment variables\n"
               DISTELLI_CI_PROVIDER="jenkins"
-              DISTELLI_BUILD_STATUS="Success"
-              
-              # Preparing to update the build event with "Success" and build end time
+              DISTELLI_BUILD_STATUS="Failed"
+
+              # Preparing to update the build event with "Failed" and build end time
               echo -e "\nPreparing to update build event in Distelli\n"
               DISTELLI_NOW=$(date -u +%Y-%m-%dT%H:%M:%S.0Z)
               DISTELLI_TMP_FILENAME="DISTELLI.$JOB_NAME.$BUILD_NUMBER.tmp"
               DISTELLI_BUILD_EVENT_ID=$(cat "$DISTELLI_TMP_FILENAME")
               DISTELLI_RESPONSE=$(rm "$DISTELLI_TMP_FILENAME")
-              
+
               echo -e "Updating build event in Distelli\n"
               # Updating build event with "Success" and build end time
-              API_JSON=$(printf '{"build_status":%s, "build_end":%s, "release_version":%s}' \
-                "$(jq -R . <<<"$DISTELLI_BUILD_STATUS")" \
-                "$(jq -R . <<<"$DISTELLI_NOW")" \
-                "$(jq -R . <<<"$DISTELLI_RELEASE_VERSION")")
-              
+              API_JSON=$(printf '{"build_status":%s, "build_end":%s}' \
+                  "$(jq -R . <<<"$DISTELLI_BUILD_STATUS")" \
+                    "$(jq -R . <<<"$DISTELLI_NOW")")
+
               DISTELLI_RESPONSE=$(curl -s -k -H "Content-Type: application/json" \
-                -X POST "$DISTELLI_API_URL/apps/$DISTELLI_APP_NAME/events/$DISTELLI_BUILD_EVENT_ID?apiToken=$PIPELINES_API_TOKEN" \
-                -d "$API_JSON")
-              
+                  -X POST "$DISTELLI_API_URL/apps/$DISTELLI_APP_NAME/events/$DISTELLI_BUILD_EVENT_ID?apiToken=$PIPELINES_API_TOKEN" \
+                    -d "$API_JSON")
+
               echo -e "Distelli Build Update Response:\n $DISTELLI_RESPONSE\n\n"
               ''')
-            } catch () {
-                sh(script: '''
-                  # This script will update the Build status
-
-                  DISTELLI_TMP_RELEASE="DISTELLIrelease.$JOB_NAME.$BUILD_NUMBER.tmp"
-
-                  # Setting global Distelli Env Variables
-                  echo -e "\nSetting global Distelli environment variables\n"
-                  DISTELLI_CI_PROVIDER="jenkins"
-                  DISTELLI_BUILD_STATUS="Failed"
-
-                  # Preparing to update the build event with "Failed" and build end time
-                  echo -e "\nPreparing to update build event in Distelli\n"
-                  DISTELLI_NOW=$(date -u +%Y-%m-%dT%H:%M:%S.0Z)
-                  DISTELLI_TMP_FILENAME="DISTELLI.$JOB_NAME.$BUILD_NUMBER.tmp"
-                  DISTELLI_BUILD_EVENT_ID=$(cat "$DISTELLI_TMP_FILENAME")
-                  DISTELLI_RESPONSE=$(rm "$DISTELLI_TMP_FILENAME")
-
-                  echo -e "Updating build event in Distelli\n"
-                  # Updating build event with "Success" and build end time
-                  API_JSON=$(printf '{"build_status":%s, "build_end":%s}' \
-                      "$(jq -R . <<<"$DISTELLI_BUILD_STATUS")" \
-                        "$(jq -R . <<<"$DISTELLI_NOW")")
-
-                  DISTELLI_RESPONSE=$(curl -s -k -H "Content-Type: application/json" \
-                      -X POST "$DISTELLI_API_URL/apps/$DISTELLI_APP_NAME/events/$DISTELLI_BUILD_EVENT_ID?apiToken=$PIPELINES_API_TOKEN" \
-                        -d "$API_JSON")
-
-                  echo -e "Distelli Build Update Response:\n $DISTELLI_RESPONSE\n\n"
-                  ''')
-            }
-          }
-        }
-      }
-
-
-      stage('Validate Tests Exist'){
-        ansiColor('xterm') {
-          sh(script: '''
-            export PATH=$PATH:$HOME/.rbenv/bin
-            rbenv global 2.3.1
-            eval "$(rbenv init -)"
-            bundle exec rake check_for_spec_tests
-          ''')
         }
       }
     }
-  }
-}
 
-stage('Run Spec Tests') {
-  parallel(
-    'linux::profile::spec': {
-      runSpecTests('linux')
-    },
-    'windows::profile::spec': {
-      runSpecTests('windows')
+def pushData (method,baseurl,args,payload) {
+  def jsonSlurper = new JsonSlurper()
+  try {
+    def fullurl = "${baseurl}/${args}"
+    def post = new URL(fullurl).openConnection();
+    post.setRequestMethod(method)
+    post.setDoOutput(true)
+    post.setRequestProperty("Content-Type", "application/json")
+    post.getOutputStream().write(JsonOutput.toJson(payload).getBytes("UTF-8"));
+    def postRC = post.getResponseCode();
+    if(postRC.equals(200)) {
+      def object = jsonSlurper.parseText(post.getInputStream().getText());
+      return object
+    }else{
+      throw "POST to ${baseurl} failed! Response code ${postRC}"
     }
-  )
-}
-
-
-// functions
-def loadenv(){
-  withEnv(['PATH+EXTRA=/usr/local/bin']) {
-    ansiColor('xterm') {
-      sh(script: '''
-	echo -e "\nSetting global Puppet Pipelines environment variables\n"
-	DISTELLI_USERNAME=ipcrm
-	DISTELLI_API_URL="https://api.distelli.com/$DISTELLI_USERNAME"
-	DISTELLI_APP_NAME="sparkjava-puppet-webapp"
-	DISTELLI_CI_PROVIDER="jenkins"
-	DISTELLI_BUILD_STATUS="Running"
-     ''')
-    }
-  }
-}
-
-def loadgitspecific(){
-  withEnv(['PATH+EXTRA=/usr/local/bin']) {
-    ansiColor('xterm') {
-      sh(script: '''
-	if [ ! -z "$GIT_COMMIT" ]; then
-	  echo -e "Using GIT variables.\n"
-	  DISTELLI_BUILD_ID=$BUILD_NUMBER
-	  DISTELLI_BUILD_URL=$BUILD_URL
-	  DISTELLI_CHANGE_URL=$GIT_URL
-	  DISTELLI_CHANGE_AUTHOR=$GIT_AUTHOR_NAME
-	  DISTELLI_CHANGE_AUTHOR_DISPLAY_NAME=$GIT_AUTHOR_NAME
-	  DISTELLI_CHANGE_TITLE=$(git --no-pager log --pretty=format:"%s" -1)
-	  DISTELLI_CHANGE_ID=$GIT_COMMIT
-	  DISTELLI_BRANCH_NAME=$GIT_BRANCH
-	  DISTELLI_CHANGE_TARGET=$GIT_URL
-	fi
-     ''')
-    }
-  }
-}
-
-
-def loadgitspecific(){
-  withEnv(['PATH+EXTRA=/usr/local/bin']) {
-    ansiColor('xterm') {
-      sh(script: '''
-
-     ''')
-    }
-  }
-}
-
-
-def runSpecTests(def platform){
-  node('tse-slave-' + platform) {
-    sshagent (credentials: ['jenkins-seteam-ssh']) {
-      checkout scm
-      "$platform"()
-    }
+  } catch (Exception e) {
+    throw e
   }
 }
