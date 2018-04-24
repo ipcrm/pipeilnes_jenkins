@@ -44,6 +44,7 @@ node('pipelines') {
   stage('Create Build Event'){
     try {
       def DISTELLI_NOW = sh(returnStdout: true, script: 'date -u +%Y-%m-%dT%H:%M:%S.0Z').trim()
+      echo 'IAMHERE'
       def data = [:]
       data["build_status"] = 'running'
       data["build_start"] = DISTELLI_NOW
@@ -72,7 +73,7 @@ node('pipelines') {
       //  - Distelli Manifest, PkgInclude: *XYZ Artifacts*
       // End of Customer Code
 
-      sh('distelli push -save-release release_version.out && cat release_version.out')
+      sh('distelli push -save-release release_version.out && echo "HI" && cat release_version.out')
       echo 'I am here - 3'
       DISTELLI_NOW = sh(returnStdout: true, script: 'date -u +%Y-%m-%dT%H:%M:%S.0Z').trim()
       echo 'I am here - 4'
