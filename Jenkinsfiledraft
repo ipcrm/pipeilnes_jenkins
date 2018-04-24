@@ -47,17 +47,17 @@ node('pipelines') {
       def builddata = [:]
       builddata["build_status"] = 'running'
       builddata["build_start"] = DISTELLI_NOW
-     // builddata["build_id"] = DISTELLI_BUILD_ID
-     // builddata["build_provider"] = 'jenkins'
-     // builddata["build_url"] = DISTELLI_BUILD_URL
-     // builddata["repo_url"] = DISTELLI_CHANGE_TARGET 
-     // builddata["commit_url"] = DISTELLI_CHANGE_URL
-     // builddata["author_username"] = DISTELLI_CHANGE_AUTHOR
-     // builddata["author_name"] = DISTELLI_CHANGE_AUTHOR_DISPLAY_NAME
-     // builddata["commit_msg"] = DISTELLI_CHANGE_TITLE
-     // builddata["commit_id"] = DISTELLI_CHANGE_ID
-     // builddata["branch"] = DISTELLI_BRANCH_NAME
-     // builddata["parent_event_id"] = PIPELINES_EVENT_ID
+      builddata["build_id"] = DISTELLI_BUILD_ID
+      builddata["build_provider"] = 'jenkins'
+      builddata["build_url"] = DISTELLI_BUILD_URL
+      builddata["repo_url"] = DISTELLI_CHANGE_TARGET 
+      builddata["commit_url"] = DISTELLI_CHANGE_URL
+      builddata["author_username"] = DISTELLI_CHANGE_AUTHOR
+      builddata["author_name"] = DISTELLI_CHANGE_AUTHOR_DISPLAY_NAME
+      builddata["commit_msg"] = DISTELLI_CHANGE_TITLE
+      builddata["commit_id"] = DISTELLI_CHANGE_ID
+      builddata["branch"] = DISTELLI_BRANCH_NAME
+      builddata["parent_event_id"] = PIPELINES_PUSH_EVENT_ID
       echo 'IAMHERE'
       
       def pipeargs = "apps/${DISTELLI_APP_NAME}/events/buildEvent?apiToken=${PIPELINES_API_TOKEN}"
