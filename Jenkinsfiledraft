@@ -8,8 +8,8 @@ def DISTELLI_APP_NAME = "pipeilnes_jenkins"
 
 PIPELINES_API_TOKEN='ibmmox8a2mspxs5lzh3ozhwe9xyq0smslsmmg' //BAD!
 
-def PIPEILNES_PUSH_EVENT_ID = ''
-def PIPEILNES_BUILD_EVENT_ID = ''
+def PIPELINES_PUSH_EVENT_ID = ''
+def PIPELINES_BUILD_EVENT_ID = ''
 
 
 node('pipelines') {
@@ -57,7 +57,7 @@ node('pipelines') {
       data["commit_msg"] = DISTELLI_CHANGE_TITLE
       data["commit_id"] = DISTELLI_CHANGE_ID
       data["branch"] = DISTELLI_BRANCH_NAME
-      data["parent_event_id"] = PIPEILNES_EVENT_ID
+      data["parent_event_id"] = PIPELINES_EVENT_ID
       
       def pipeargs = "apps/${DISTELLI_APP_NAME}/events/buildEvent?apiToken=${PIPELINES_API_TOKEN}"
       PIPELINES_BUILD_EVENT_ID = pushData('PUT',DISTELLI_API_URL,pipeargs,data)['event_id']
