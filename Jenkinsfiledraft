@@ -93,6 +93,8 @@ node('pipelines') {
 
         def eventargs = "apps/${DISTELLI_APP_NAME}/events/${PIPELINES_BUILD_EVENT_ID}?apiToken=${PIPELINES_API_TOKEN}"
         pushData('POST',DISTELLI_API_URL,eventargs,eventdata)
+
+        error('Failed to build!')
       }
     }
 }
