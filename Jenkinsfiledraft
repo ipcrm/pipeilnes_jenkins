@@ -70,7 +70,7 @@ node('pipelines') {
         def eventdata = [:]
         eventdata['build_status'] = 'Succeeded'
         eventdata['build_end'] = DISTELLI_NOW
-        eventdata['release_version'] = sh(returnStdout: true, script 'cat release_version.out')
+        eventdata['release_version'] = sh(returnStdout: true, script:'cat release_version.out')
 
         def eventargs = "/apps/${DISTELLI_APP_NAME}/events/${DISTELLI_BUILD_EVENT_ID}?apiToken=${PIPELINES_API_TOKEN}"
         pushData('POST',DISTELLI_API_URL,eventargs,eventdata)
