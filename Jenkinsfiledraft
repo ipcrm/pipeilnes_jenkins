@@ -2,7 +2,7 @@
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
-def DISTELLI_USERNAME=ipcrm
+def DISTELLI_USERNAME='ipcrm'
 def DISTELLI_API_URL="https://api.distelli.com/$DISTELLI_USERNAME"
 def DISTELLI_APP_NAME="pipelines_jenkins"
 def DISTELLI_CI_PROVIDER="jenkins"
