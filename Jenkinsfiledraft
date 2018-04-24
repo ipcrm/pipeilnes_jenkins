@@ -68,11 +68,11 @@ node('pipelines') {
       //  - Distelli Manifest, PkgInclude: *XYZ Artifacts*
       // End of Customer Code
 
-      sh('distelli push -save-release release_version.out && echo "HI" && cat release_version.out')
+      sh('distelli push -save-release release_version.out')
       DISTELLI_NOW = sh(returnStdout: true, script: 'date -u +%Y-%m-%dT%H:%M:%S.0Z').trim()
 
       def eventdata = [:]
-      eventdata['build_status'] = 'Succeeded'
+      eventdata['build_status'] = 'Success'
       eventdata['build_end'] = DISTELLI_NOW
       eventdata['release_version'] = sh(returnStdout: true, script:'cat release_version.out')
 
