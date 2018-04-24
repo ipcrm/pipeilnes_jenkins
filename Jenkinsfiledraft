@@ -99,7 +99,7 @@ def pushData (method,baseurl,args,payload) {
     post.setRequestProperty("Content-Type", "application/json")
     post.getOutputStream().write(JsonOutput.toJson(payload).getBytes("UTF-8"));
     def postRC = post.getResponseCode();
-    echo 'postRC'
+    echo postRC
     if(postRC.equals(200)) {
       def object = jsonSlurper.parseText(post.getInputStream().getText());
       return object
