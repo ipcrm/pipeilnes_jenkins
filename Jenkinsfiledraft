@@ -58,11 +58,9 @@ node('pipelines') {
       builddata["commit_id"] = DISTELLI_CHANGE_ID
       builddata["branch"] = DISTELLI_BRANCH_NAME
       builddata["parent_event_id"] = PIPELINES_PUSH_EVENT_ID
-      echo 'IAMHERE'
       
       def pipeargs = "apps/${DISTELLI_APP_NAME}/events/buildEvent?apiToken=${PIPELINES_API_TOKEN}"
       PIPELINES_BUILD_EVENT_ID = pushData('PUT',DISTELLI_API_URL,pipeargs,builddata)['event_id']
-      echo 'I am here - 2'
 
       // Customer Code
       //  Compile XYZ
@@ -71,10 +69,7 @@ node('pipelines') {
       // End of Customer Code
 
       sh('distelli push -save-release release_version.out && echo "HI" && cat release_version.out')
-      echo 'I am here - 3'
       DISTELLI_NOW = sh(returnStdout: true, script: 'date -u +%Y-%m-%dT%H:%M:%S.0Z').trim()
-      echo 'I am here - 4'
-
 
       def eventdata = [:]
       eventdata['build_status'] = 'Succeeded'
