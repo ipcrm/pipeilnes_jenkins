@@ -104,7 +104,8 @@ def pushData (method,baseurl,args,payload) {
       def object = jsonSlurper.parseText(post.getInputStream().getText());
       return object
     }else{
-      throw "POST to ${baseurl} failed! Response code ${postRC.toString()}"
+      echo "POST to ${baseurl} failed! Response code ${postRC.toString()}"
+      throw
     }
   } catch (Exception e) {
     throw e
