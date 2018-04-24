@@ -75,7 +75,7 @@ node('pipelines') {
         def eventargs = "/apps/${DISTELLI_APP_NAME}/events/${DISTELLI_BUILD_EVENT_ID}?apiToken=${PIPELINES_API_TOKEN}"
         pushData('POST',DISTELLI_API_URL,eventargs,eventdata)
 
-      } catch () {
+      } catch (all) {
           def DISTELLI_NOW = sh(returnStdout: true, script: 'date -u +%Y-%m-%dT%H:%M:%S.0Z')
 
           def eventdata = [:]
