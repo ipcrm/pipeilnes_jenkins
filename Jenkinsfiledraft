@@ -2,21 +2,20 @@
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
-def DISTELLI_USERNAME='ipcrm'
-def DISTELLI_API_URL="https://api.distelli.com/$DISTELLI_USERNAME"
-def DISTELLI_APP_NAME="pipelines_jenkins"
-def DISTELLI_CI_PROVIDER="jenkins"
-def DISTELLI_BUILD_STATUS="Running"
-//git variables
-def DISTELLI_BUILD_ID=env.BUILD_NUMBER
-def DISTELLI_BUILD_URL=env.BUILD_URL
-def DISTELLI_CHANGE_URL=env.GIT_URL
-def DISTELLI_CHANGE_AUTHOR=env.GIT_AUTHOR_NAME
-def DISTELLI_CHANGE_AUTHOR_DISPLAY_NAME=env.GIT_AUTHOR_NAME
-def DISTELLI_CHANGE_ID=env.GIT_COMMIT
-def DISTELLI_BRANCH_NAME=env.GIT_BRANCH
-def DISTELLI_CHANGE_TARGET=env.GIT_URL
-def PIPELINES_API_TOKEN='ibmmox8a2mspxs5lzh3ozhwe9xyq0smslsmmg' //BAD!
+DISTELLI_USERNAME='ipcrm'
+DISTELLI_API_URL="https://api.distelli.com/$DISTELLI_USERNAME"
+DISTELLI_APP_NAME="pipelines_jenkins"
+
+DISTELLI_BUILD_ID=env.BUILD_NUMBER
+DISTELLI_BUILD_URL=env.BUILD_URL
+DISTELLI_CHANGE_URL=env.GIT_URL
+DISTELLI_CHANGE_AUTHOR=env.GIT_AUTHOR_NAME
+DISTELLI_CHANGE_AUTHOR_DISPLAY_NAME=env.GIT_AUTHOR_NAME
+DISTELLI_CHANGE_ID=env.GIT_COMMIT
+DISTELLI_BRANCH_NAME=env.GIT_BRANCH
+DISTELLI_CHANGE_TARGET=env.GIT_URL
+
+PIPELINES_API_TOKEN='ibmmox8a2mspxs5lzh3ozhwe9xyq0smslsmmg' //BAD!
 
 def PIPEILNES_PUSH_EVENT_ID = ''
 def PIPEILNES_BUILD_EVENT_ID = ''
@@ -45,7 +44,7 @@ node('pipelines') {
       data["build_status"] = 'running'
       data["build_start"] = DISTELLI_NOW
       data["build_id"] = DISTELLI_BUILD_ID
-      data["build_provider"] = DISTELLI_CI_PROVIDER
+      data["build_provider"] = 'jenkins'
       data["build_url"] = DISTELLI_BUILD_URL
       data["repo_url"] = DISTELLI_CHANGE_TARGET 
       data["commit_url"] = DISTELLI_CHANGE_URL
