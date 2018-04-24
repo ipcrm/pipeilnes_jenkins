@@ -58,7 +58,6 @@ node('pipelines') {
       data["commit_id"] = DISTELLI_CHANGE_ID
       data["branch"] = DISTELLI_BRANCH_NAME
       data["parent_event_id"] = PIPELINES_EVENT_ID
-
       echo 'IAMHERE'
       
       def pipeargs = "apps/${DISTELLI_APP_NAME}/events/buildEvent?apiToken=${PIPELINES_API_TOKEN}"
