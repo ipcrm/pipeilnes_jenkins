@@ -2,11 +2,6 @@
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
-DISTELLI_USERNAME = 'ipcrm'
-DISTELLI_API_URL  = "https://api.distelli.com/$DISTELLI_USERNAME"
-DISTELLI_APP_NAME = "pipeilnes_jenkins"
-PIPELINES_API_TOKEN ='ibmmox8a2mspxs5lzh3ozhwe9xyq0smslsmmg' //BAD!
-
 //Methods
 def set_env_stuff() {
   env.GIT_AUTHOR_NAME = sh(returnStdout: true, script: "git --no-pager show -s --format='%an'").trim()
@@ -99,10 +94,15 @@ def pushData (method,baseurl,args,payload) {
 
 //Main
 node('pipelines') {
+  def DISTELLI_USERNAME = 'ipcrm'
+  def DISTELLI_API_URL  = "https://api.distelli.com/$DISTELLI_USERNAME"
+  def DISTELLI_APP_NAME = "pipeilnes_jenkins"
+  def PIPELINES_API_TOKEN ='ibmmox8a2mspxs5lzh3ozhwe9xyq0smslsmmg' //BAD!
+  set_env_stuff()
+
   checkout(scm).each { k,v -> env.setProperty(k, v) }
   stage('build stuff'){
     try {
-        set_env_stuff()
         create_push_event()
         def build_id = create_build_event
 
