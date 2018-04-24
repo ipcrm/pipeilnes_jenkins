@@ -43,7 +43,7 @@ node('pipelines') {
 
   stage('Create Build Event'){
     try {
-      def DISTELLI_NOW = sh(returnStdout: true, script: 'date -u +%Y-%m-%dT%H:%M:%S.0Z')
+      def DISTELLI_NOW = sh(returnStdout: true, script: 'date -u +%Y-%m-%dT%H:%M:%S.0Z').trim()
       def data = [:]
       data["build_status"] = 'running'
       data["build_start"] = DISTELLI_NOW
@@ -69,7 +69,7 @@ node('pipelines') {
       // End of Customer Code
 
       sh('distelli push -save-release release_version.out')
-      DISTELLI_NOW = sh(returnStdout: true, script: 'date -u +%Y-%m-%dT%H:%M:%S.0Z')
+      DISTELLI_NOW = sh(returnStdout: true, script: 'date -u +%Y-%m-%dT%H:%M:%S.0Z').trim()
 
       def eventdata = [:]
       eventdata['build_status'] = 'Succeeded'
@@ -80,7 +80,7 @@ node('pipelines') {
       pushData('POST',DISTELLI_API_URL,eventargs,eventdata)
 
     } catch (all) {
-        def DISTELLI_NOW = sh(returnStdout: true, script: 'date -u +%Y-%m-%dT%H:%M:%S.0Z')
+        def DISTELLI_NOW = sh(returnStdout: true, script: 'date -u +%Y-%m-%dT%H:%M:%S.0Z').trim()
 
         def eventdata = [:]
         eventdata['build_status'] = 'Failed'
