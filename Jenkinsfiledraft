@@ -60,14 +60,8 @@ node('pipelines') {
       builddata["parent_event_id"] = PIPELINES_EVENT_ID
       echo 'IAMHERE'
       
-      def TESTID = pushData(
-        'PUT',
-        DISTELLI_API_URL,
-        "apps/${DISTELLI_APP_NAME}/events/buildEvent?apiToken=${PIPELINES_API_TOKEN}",
-        builddata,
-      )
-      echo TESTID
-      PIPELINES_BUILD_EVENT_ID = TESTID['event_id']
+      def pipeargs = "apps/${DISTELLI_APP_NAME}/events/buildEvent?apiToken=${PIPELINES_API_TOKEN}"
+      PIPELINES_BUILD_EVENT_ID = pushData('PUT',DISTELLI_API_URL,pipeargs,builddata)['event_id']
       echo 'I am here - 2'
 
       // Customer Code
