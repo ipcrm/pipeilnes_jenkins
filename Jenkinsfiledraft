@@ -13,12 +13,13 @@ def DISTELLI_CHANGE_AUTHOR_DISPLAY_NAME=env.GIT_AUTHOR_NAME
 def DISTELLI_CHANGE_ID=env.GIT_COMMIT
 def DISTELLI_BRANCH_NAME=env.GIT_BRANCH
 def DISTELLI_CHANGE_TARGET=env.GIT_URL
-def PIPELINES_API_TOKEN='XXXX'
+def PIPELINES_API_TOKEN='ibmmox8a2mspxs5lzh3ozhwe9xyq0smslsmmg' //BAD!
 
 def PIPEILNES_PUSH_EVENT_ID = ''
 def PIPEILNES_BUILD_EVENT_ID = ''
 
 node('pipelines') {
+
   def DISTELLI_CHANGE_TITLE = sh(returnStdout: true, script: 'git --no-pager log --pretty=format:"%s" -1')
   withEnv(['PATH+EXTRA=/usr/local/bin']) {
     checkout scm
@@ -86,6 +87,7 @@ node('pipelines') {
         }
       }
     }
+}
 
 def pushData (method,baseurl,args,payload) {
   def jsonSlurper = new JsonSlurper()
