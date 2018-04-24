@@ -18,12 +18,12 @@ node('pipelines') {
   def DISTELLI_CHANGE_TITLE = sh(returnStdout: true, script: 'git --no-pager log --pretty=format:"%s" -1')
   def DISTELLI_BUILD_ID = env.BUILD_NUMBER
   def DISTELLI_BUILD_URL= env.BUILD_URL
-  def DISTELLI_CHANGE_URL = env.GIT_URL
   def DISTELLI_CHANGE_AUTHOR = env.GIT_AUTHOR_NAME
   def DISTELLI_CHANGE_AUTHOR_DISPLAY_NAME = env.GIT_AUTHOR_NAME
   def DISTELLI_CHANGE_ID = env.GIT_COMMIT
   def DISTELLI_BRANCH_NAME = env.GIT_BRANCH.split('/')[1]
   def DISTELLI_CHANGE_TARGET = env.GIT_URL
+  def DISTELLI_CHANGE_URL = "${env.GIT_URL}/commits/${DISTELLI_CHANGE_ID}"
 
   stage('Create Push Event'){
     def pipeargs = "apps/${DISTELLI_APP_NAME}/events/pushEvent?apiToken=${PIPELINES_API_TOKEN}"
@@ -32,11 +32,13 @@ node('pipelines') {
     data['author_name'] = DISTELLI_CHANGE_AUTHOR_DISPLAY_NAME
     data['commit_msg'] = DISTELLI_CHANGE_TITLE 
     data['commit_url'] = DISTELLI_CHANGE_URL
+    data['repo_url']  = DISTELLI_CHANGE_TARGET
     data['commit_id'] = DISTELLI_CHANGE_ID 
-    data['repo_url'] = DISTELLI_CHANGE_TARGET
+    data['repo_owner'] = 'ipcrm' 
+    data['repo_name'] = 'pipelines_jenkins'
     data['branch'] = DISTELLI_BRANCH_NAME
 
-    PIPEILNES_PUSH_EVENT_ID = pushData('PUT',DISTELLI_API_URL,pipeargs,data)['event_id']
+    PIPELINES_PUSH_EVENT_ID = pushData('PUT',DISTELLI_API_URL,pipeargs,data)['event_id']
   }
 
   stage('Create Build Event'){
