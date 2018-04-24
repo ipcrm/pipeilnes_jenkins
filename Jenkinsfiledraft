@@ -41,19 +41,19 @@ node('pipelines') {
       try {
         def DISTELLI_NOW = sh(returnStdout: true, script: 'date -u +%Y-%m-%dT%H:%M:%S.0Z')
         def data = [:]
-        def data["build_status"] = 'running'
-        def data["build_start"] = DISTELLI_NOW
-        def data["build_id"] = DISTELLI_BUILD_ID
-        def data["build_provider"] = DISTELLI_CI_PROVIDER
-        def data["build_url"] = DISTELLI_BUILD_URL
-        def data["repo_url"] = DISTELLI_CHANGE_TARGET 
-        def data["commit_url"] = DISTELLI_CHANGE_URL
-        def data["author_username"] = DISTELLI_CHANGE_AUTHOR
-        def data["author_name"] = DISTELLI_CHANGE_AUTHOR_DISPLAY_NAME
-        def data["commit_msg"] = DISTELLI_CHANGE_TITLE
-        def data["commit_id"] = DISTELLI_CHANGE_ID
-        def data["branch"] = DISTELLI_BRANCH_NAME
-        def data["parent_event_id"] = PIPEILNES_EVENT_ID
+        data["build_status"] = 'running'
+        data["build_start"] = DISTELLI_NOW
+        data["build_id"] = DISTELLI_BUILD_ID
+        data["build_provider"] = DISTELLI_CI_PROVIDER
+        data["build_url"] = DISTELLI_BUILD_URL
+        data["repo_url"] = DISTELLI_CHANGE_TARGET 
+        data["commit_url"] = DISTELLI_CHANGE_URL
+        data["author_username"] = DISTELLI_CHANGE_AUTHOR
+        data["author_name"] = DISTELLI_CHANGE_AUTHOR_DISPLAY_NAME
+        data["commit_msg"] = DISTELLI_CHANGE_TITLE
+        data["commit_id"] = DISTELLI_CHANGE_ID
+        data["branch"] = DISTELLI_BRANCH_NAME
+        data["parent_event_id"] = PIPEILNES_EVENT_ID
         
         def pipeargs = "/apps/${DISTELLI_APP_NAME}/events/buildEvent?apiToken=${PIPELINES_API_TOKEN}"
         def PIPEILNES_BUILD_EVENT_ID = pushData('PUT',DISTELLI_API_URL,pipeargs,data)['event_id']
