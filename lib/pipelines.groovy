@@ -1,4 +1,6 @@
-//Methods
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+
 def set_env(config){
     env.GIT_AUTHOR_NAME = sh(returnStdout: true, script: "git --no-pager show -s --format='%an'").trim()
     DISTELLI_USERNAME = config['user']

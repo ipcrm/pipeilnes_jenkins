@@ -1,8 +1,4 @@
 #!groovy
-import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
-
-
 def config = [:]
 
 node('pipelines') {
