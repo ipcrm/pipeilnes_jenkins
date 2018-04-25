@@ -102,7 +102,7 @@ def pushData (method,baseurl,args,payload) {
 
 //Main
 node('pipelines') {
-  stage(setup) {
+  stage('setup') {
     checkout(scm).each { k,v -> env.setProperty(k, v) }
     config['user'] = 'ipcrm'
     config['api_url']  = "https://api.distelli.com/${config['user']}"
