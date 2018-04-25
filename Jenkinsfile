@@ -20,8 +20,6 @@ node('pipelines') {
       config['build_id'] = pipelines.create_build_event(config)
 
       // COMPILE/PACKAGE/WHATEVER
-      error('Fail intentionally')
-      // END Compile
 
       sh('distelli push -save-release release_version.out')
       pipelines.update_build_status(config['build_id'],'Success',config)
