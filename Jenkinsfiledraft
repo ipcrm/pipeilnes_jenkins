@@ -60,10 +60,7 @@ def create_build_event(config){
   builddata["parent_event_id"] = config['push_id']
   
   def pipeargs = "apps/${config['app_name']}/events/buildEvent?apiToken=${PIPELINES_API_TOKEN}"
-  test = pushData('PUT',config['api_url'],pipeargs,builddata)['event_id']
-
-  echo test
-  return test
+  return pushData('PUT',config['api_url'],pipeargs,builddata)['event_id']
 }
 
 def update_build_status(build_event_id,status,config){
@@ -75,7 +72,7 @@ def update_build_status(build_event_id,status,config){
   eventdata['build_end'] = DISTELLI_NOW
   eventdata['release_version'] = sh(returnStdout: true, script:'cat release_version.out').trim()
 
-  def eventargs = "apps/${config['api_url']}/events/${build_event_id}?apiToken=${PIPELINES_API_TOKEN}"
+  def eventargs = "apps/${config['app_name']}/events/${build_event_id}?apiToken=${PIPELINES_API_TOKEN}"
   pushData('POST',config['api_url'],eventargs,eventdata)
 }
 
