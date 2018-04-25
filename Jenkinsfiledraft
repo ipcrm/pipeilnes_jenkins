@@ -10,7 +10,7 @@ node('pipelines') {
   config['api_url']  = "https://api.distelli.com/$DISTELLI_USERNAME"
   config['app_name'] = "pipeilnes_jenkins"
   config['api_token'] = 'ibmmox8a2mspxs5lzh3ozhwe9xyq0smslsmmg' //BAD!
-  set_env_stuff()
+  set_env_stuff(config)
 
   stage('build stuff'){
     try {
@@ -29,7 +29,7 @@ node('pipelines') {
   }
 }
 //Methods
-def set_env_stuff() {
+def set_env_stuff(config) {
   env.GIT_AUTHOR_NAME = sh(returnStdout: true, script: "git --no-pager show -s --format='%an'").trim()
   def DISTELLI_USERNMAE = config['user']
   def DISTELLI_API_URL = config['api_url']
