@@ -17,7 +17,9 @@ node('pipelines') {
   stage('build stuff'){
     try {
       config['push_id'] = pipelines.create_push_event(config)
+      echo config.toString()
       config['build_id'] = pipelines.create_build_event(config)
+      echo config.toString()
 
       // COMPILE/PACKAGE/WHATEVER
 
