@@ -59,8 +59,8 @@ def create_build_event(config){
   builddata["branch"] = DISTELLI_BRANCH_NAME
   builddata["parent_event_id"] = PIPELINES_PUSH_EVENT_ID
   
-  def pipeargs = "apps/${DISTELLI_APP_NAME}/events/buildEvent?apiToken=${PIPELINES_API_TOKEN}"
-  return pushData('PUT',DISTELLI_API_URL,pipeargs,builddata)['event_id']
+  def pipeargs = "apps/${config['app_name']}/events/buildEvent?apiToken=${PIPELINES_API_TOKEN}"
+  return pushData('PUT',config['app_url'],pipeargs,builddata)['event_id']
 }
 
 def update_build_status(build_event_id,status,config){
@@ -72,8 +72,8 @@ def update_build_status(build_event_id,status,config){
   eventdata['build_end'] = DISTELLI_NOW
   eventdata['release_version'] = sh(returnStdout: true, script:'cat release_version.out').trim()
 
-  def eventargs = "apps/${DISTELLI_APP_NAME}/events/${build_event_id}?apiToken=${PIPELINES_API_TOKEN}"
-  pushData('POST',DISTELLI_API_URL,eventargs,eventdata)
+  def eventargs = "apps/${config['api_url']}/events/${build_event_id}?apiToken=${PIPELINES_API_TOKEN}"
+  pushData('POST',config['api_url'],eventargs,eventdata)
 }
 
 def pushData (method,baseurl,args,payload) {
