@@ -107,10 +107,10 @@ node('pipelines') {
   config['api_url']  = "https://api.distelli.com/${config['user']}"
   config['app_name'] = "pipeilnes_jenkins"
   config['api_token'] = 'ibmmox8a2mspxs5lzh3ozhwe9xyq0smslsmmg' //BAD!
-  set_env_stuff(config)
 
   stage('build stuff'){
     try {
+        set_env_stuff(config)
         create_push_event()
         def build_id = create_build_event
 
