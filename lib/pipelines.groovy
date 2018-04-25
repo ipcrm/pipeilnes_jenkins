@@ -79,12 +79,14 @@ def update_build_status(build_event_id,status,config){
 def pushData (method,baseurl,args,payload) {
   def jsonSlurper = new JsonSlurper()
   def jsonbody = new JsonBuilder(payload)
+  echo jsonbody
   try {
     def fullurl = "${baseurl}/${args}"
     def response = httpRequest(
       contentType: 'APPLICATION_JSON', 
       httpMode: method,
       url: fullurl, 
+      consoleLogResponseBody: true,
       requestBody: jsonbody.content
     )
     return jsonSlurper.parseText(response);
