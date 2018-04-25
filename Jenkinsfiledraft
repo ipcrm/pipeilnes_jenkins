@@ -55,7 +55,7 @@ def create_build_event(config){
   builddata["commit_msg"] = DISTELLI_CHANGE_TITLE
   builddata["commit_id"] = DISTELLI_CHANGE_ID
   builddata["branch"] = DISTELLI_BRANCH_NAME
-  builddata["parent_event_id"] = PIPELINES_PUSH_EVENT_ID
+  builddata["parent_event_id"] = config['push_id']
   
   def pipeargs = "apps/${config['app_name']}/events/buildEvent?apiToken=${PIPELINES_API_TOKEN}"
   test = pushData('PUT',config['app_url'],pipeargs,builddata)['event_id']
@@ -114,7 +114,7 @@ node('pipelines') {
   }
 
   stage('build stuff'){
-    create_push_event(config)
+    config['push_id'] = create_push_event(config)
     config['build_id'] = create_build_event(config)
 
     // COMPILE/PACKAGE/WHATEVER
