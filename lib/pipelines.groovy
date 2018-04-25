@@ -33,9 +33,7 @@ def create_push_event(config){
     data['repo_name'] = 'pipelines_jenkins'
     data['branch'] = DISTELLI_BRANCH_NAME
 
-    def test = pushData('PUT',config['api_url'],pipeargs,data)
-    echo test['event_id']
-    return test['event_id']
+    return pushData('PUT',config['api_url'],pipeargs,data)['event_id']
   }
 }
 
@@ -82,8 +80,6 @@ def pushData (method,baseurl,args,payload) {
     post.setDoOutput(true)
     post.setRequestProperty("Content-Type", "application/json")
     post.getOutputStream().write(JsonOutput.toJson(payload).getBytes("UTF-8"));
-    echo fullurl
-    echo JsonOutput.toJson(payload) 
     def postRC = post.getResponseCode();
     if(postRC.equals(200)) {
       def object = jsonSlurper.parseText(post.getInputStream().getText());
