@@ -2,9 +2,39 @@
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
+//Main
+def config = [:]
+node('pipelines') {
+  checkout(scm).each { k,v -> env.setProperty(k, v) }
+  config['user'] = 'ipcrm'
+  config['api_url']  = "https://api.distelli.com/$DISTELLI_USERNAME"
+  config['app_name'] = "pipeilnes_jenkins"
+  config['api_token'] = 'ibmmox8a2mspxs5lzh3ozhwe9xyq0smslsmmg' //BAD!
+  set_env_stuff()
+
+  stage('build stuff'){
+    try {
+        create_push_event()
+        def build_id = create_build_event
+
+        // COMPILE/PACKAGE/WHATEVER
+        sh('distelli push -save-release release_version.out')
+        // END Compile
+
+        update_build_status(build_id,'Success')
+    } catch (all) {
+       update_build_status(build_id,'Failed')
+    }
+
+  }
+}
 //Methods
 def set_env_stuff() {
   env.GIT_AUTHOR_NAME = sh(returnStdout: true, script: "git --no-pager show -s --format='%an'").trim()
+  def DISTELLI_USERNMAE = config['user']
+  def DISTELLI_API_URL = config['api_url']
+  def DISTELLI_APP_NAME = config['app_name']
+  def DISTELLI_API_TOKEN = config['api_token']
   def DISTELLI_CHANGE_TITLE = sh(returnStdout: true, script: 'git --no-pager log --pretty=format:"%s" -1')
   def DISTELLI_BUILD_ID = env.BUILD_NUMBER
   def DISTELLI_BUILD_URL= env.BUILD_URL
@@ -96,32 +126,5 @@ def pushData (method,baseurl,args,payload) {
     }
   } catch (Exception e) {
     throw e
-  }
-}
-
-
-//Main
-node('pipelines') {
-  checkout(scm).each { k,v -> env.setProperty(k, v) }
-  env.DISTELLI_USERNAME = 'ipcrm'
-  env.DISTELLI_API_URL  = "https://api.distelli.com/$DISTELLI_USERNAME"
-  env.DISTELLI_APP_NAME = "pipeilnes_jenkins"
-  env.PIPELINES_API_TOKEN ='ibmmox8a2mspxs5lzh3ozhwe9xyq0smslsmmg' //BAD!
-  set_env_stuff()
-
-  stage('build stuff'){
-    try {
-        create_push_event()
-        def build_id = create_build_event
-
-        // COMPILE/PACKAGE/WHATEVER
-        sh('distelli push -save-release release_version.out')
-        // END Compile
-
-        update_build_status(build_id,'Success')
-    } catch (all) {
-       update_build_status(build_id,'Failed')
-    }
-
   }
 }
