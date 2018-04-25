@@ -5,20 +5,22 @@ import groovy.json.JsonSlurper
 def config = [:]
 //Methods
 def set_env_stuff(config) {
-  env.GIT_AUTHOR_NAME = sh(returnStdout: true, script: "git --no-pager show -s --format='%an'").trim()
-  def DISTELLI_USERNAME = config['user']
-  def DISTELLI_API_URL = config['api_url']
-  def DISTELLI_APP_NAME = config['app_name']
-  def DISTELLI_API_TOKEN = config['api_token']
-  def DISTELLI_CHANGE_TITLE = sh(returnStdout: true, script: 'git --no-pager log --pretty=format:"%s" -1')
-  def DISTELLI_BUILD_ID = env.BUILD_NUMBER
-  def DISTELLI_BUILD_URL= env.BUILD_URL
-  def DISTELLI_CHANGE_AUTHOR = env.GIT_AUTHOR_NAME
-  def DISTELLI_CHANGE_AUTHOR_DISPLAY_NAME = env.GIT_AUTHOR_NAME
-  def DISTELLI_CHANGE_ID = env.GIT_COMMIT
-  def DISTELLI_BRANCH_NAME = env.GIT_BRANCH.split('/')[1]
-  def DISTELLI_CHANGE_TARGET = env.GIT_URL
-  def DISTELLI_CHANGE_URL = "${env.GIT_URL}/commits/${DISTELLI_CHANGE_ID}"
+  step(
+    env.GIT_AUTHOR_NAME = sh(returnStdout: true, script: "git --no-pager show -s --format='%an'").trim()
+    def DISTELLI_USERNAME = config['user']
+    def DISTELLI_API_URL = config['api_url']
+    def DISTELLI_APP_NAME = config['app_name']
+    def DISTELLI_API_TOKEN = config['api_token']
+    def DISTELLI_CHANGE_TITLE = sh(returnStdout: true, script: 'git --no-pager log --pretty=format:"%s" -1')
+    def DISTELLI_BUILD_ID = env.BUILD_NUMBER
+    def DISTELLI_BUILD_URL= env.BUILD_URL
+    def DISTELLI_CHANGE_AUTHOR = env.GIT_AUTHOR_NAME
+    def DISTELLI_CHANGE_AUTHOR_DISPLAY_NAME = env.GIT_AUTHOR_NAME
+    def DISTELLI_CHANGE_ID = env.GIT_COMMIT
+    def DISTELLI_BRANCH_NAME = env.GIT_BRANCH.split('/')[1]
+    def DISTELLI_CHANGE_TARGET = env.GIT_URL
+    def DISTELLI_CHANGE_URL = "${env.GIT_URL}/commits/${DISTELLI_CHANGE_ID}"
+  )
 }
 
 def create_push_event(){
