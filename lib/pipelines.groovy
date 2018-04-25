@@ -81,10 +81,10 @@ def pushData (method,baseurl,args,payload) {
   try {
     def fullurl = "${baseurl}/${args}"
     def response = httpRequest(
-      contentType: 'APPLICATION_JSON_UTF8', 
-      httpMode: 'PUT', 
+      contentType: 'APPLICATION_JSON', 
+      httpMode: method,
       url: fullurl, 
-      requestBody: jsonbody.content
+      requestBody: jsonbody.content.toString()
     )
     return jsonSlurper.parseText(response);
   } catch (Exception e) {
