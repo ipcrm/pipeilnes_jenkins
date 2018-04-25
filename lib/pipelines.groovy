@@ -85,7 +85,7 @@ def pushData (method,baseurl,args,payload) {
       contentType: 'APPLICATION_JSON', 
       httpMode: method,
       url: fullurl, 
-      requestBody: jsonbody.content.toString()
+      requestBody: jsonbody.content
     )
     return jsonSlurper.parseText(response);
   } catch (Exception e) {
