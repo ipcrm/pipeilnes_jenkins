@@ -37,7 +37,7 @@ def create_push_event(config){
     data['branch'] = DISTELLI_BRANCH_NAME
 
     def test = pushData('PUT',DISTELLI_API_URL,pipeargs,data)
-    echo test
+    echo test['event_id']
     return test['event_id']
   }
 }
