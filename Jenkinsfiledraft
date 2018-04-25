@@ -21,9 +21,9 @@ def set_env(config){
     def DISTELLI_CHANGE_URL = "${env.GIT_URL}/commits/${DISTELLI_CHANGE_ID}"
 }
 
-def create_push_event(){
+def create_push_event(config){
   stage('Create Push Event'){
-    set_env_stuff()
+    set_env(config)
     def pipeargs = "apps/${DISTELLI_APP_NAME}/events/pushEvent?apiToken=${PIPELINES_API_TOKEN}"
     def data = [:]
     data['author_username'] = DISTELLI_CHANGE_AUTHOR
@@ -40,9 +40,9 @@ def create_push_event(){
   }
 }
 
-def create_build_event(){
+def create_build_event(config){
     stage('Create Build Event'){
-      set_env_stuff()
+      set_env(config)
       def DISTELLI_NOW = sh(returnStdout: true, script: 'date -u +%Y-%m-%dT%H:%M:%S.0Z').trim()
       def builddata = [:]
       builddata["build_status"] = 'running'
@@ -64,8 +64,8 @@ def create_build_event(){
   }
 }
 
-def update_build_status(build_event_id,status){
-  set_env_stuff()
+def update_build_status(build_event_id,status,config){
+  set_env_stuff(config)
   DISTELLI_NOW = sh(returnStdout: true, script: 'date -u +%Y-%m-%dT%H:%M:%S.0Z').trim()
 
   def eventdata = [:]
@@ -102,27 +102,27 @@ def pushData (method,baseurl,args,payload) {
 
 //Main
 node('pipelines') {
+  config['user'] = 'ipcrm'
+  config['api_url']  = "https://api.distelli.com/${config['user']}"
+  config['app_name'] = "pipeilnes_jenkins"
+  config['api_token'] = 'ibmmox8a2mspxs5lzh3ozhwe9xyq0smslsmmg' //BAD!
+
   stage('setup') {
     checkout(scm).each { k,v -> env.setProperty(k, v) }
-    config['user'] = 'ipcrm'
-    config['api_url']  = "https://api.distelli.com/${config['user']}"
-    config['app_name'] = "pipeilnes_jenkins"
-    config['api_token'] = 'ibmmox8a2mspxs5lzh3ozhwe9xyq0smslsmmg' //BAD!
-    set_env_stuff(config)
   }
 
   stage('build stuff'){
     try {
-        create_push_event()
-        def build_id = create_build_event
+        create_push_event(config)
+        def build_id = create_build_event(config)
 
         // COMPILE/PACKAGE/WHATEVER
         sh('distelli push -save-release release_version.out')
         // END Compile
 
-        update_build_status(build_id,'Success')
+        update_build_status(build_id,'Success',config)
     } catch (all) {
-       update_build_status(build_id,'Failed')
+       update_build_status(build_id,'Failed',config)
     }
 
   }
