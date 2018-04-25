@@ -7,7 +7,7 @@ def config = [:]
 
 node('pipelines') {
   def rootDir = pwd()
-  pipelines = load "${rootDir}@script/lib/pipelines.groovy "
+  pipelines = load "${rootDir}@script/lib/pipelines.groovy"
 
   config['user'] = 'ipcrm'
   config['api_url']  = "https://api.distelli.com/${config['user']}"
