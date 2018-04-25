@@ -6,6 +6,7 @@ import groovy.json.JsonSlurper
 def config = [:]
 
 node('pipelines') {
+  def rootDir = pwd()
   pipelines = load "${rootDir}@script/lib/pipelines.groovy "
 
   config['user'] = 'ipcrm'
