@@ -11,7 +11,6 @@ def set_env(config){
     DISTELLI_APP_NAME = config['app_name']
     DISTELLI_API_TOKEN = config['api_token']
     DISTELLI_CHANGE_TITLE = sh(returnStdout: true, script: 'git --no-pager log --pretty=format:"%s" -1')
-    DISTELLI_BUILD_ID = env.BUILD_NUMBER
     DISTELLI_BUILD_URL= env.BUILD_URL
     DISTELLI_CHANGE_AUTHOR = env.GIT_AUTHOR_NAME
     DISTELLI_CHANGE_AUTHOR_DISPLAY_NAME = env.GIT_AUTHOR_NAME
@@ -47,7 +46,6 @@ def create_build_event(config){
   def builddata = [:]
   builddata["build_status"] = 'running'
   builddata["build_start"] = DISTELLI_NOW
-  builddata["build_id"] = DISTELLI_BUILD_ID
   builddata["build_provider"] = 'jenkins'
   builddata["build_url"] = DISTELLI_BUILD_URL
   builddata["repo_url"] = DISTELLI_CHANGE_TARGET 
@@ -114,15 +112,15 @@ node('pipelines') {
   stage('build stuff'){
     try {
         create_push_event(config)
-        def build_id = create_build_event(config)
+        def pipelines_build_id = create_build_event(config)
 
         // COMPILE/PACKAGE/WHATEVER
         sh('distelli push -save-release release_version.out')
         // END Compile
 
-        update_build_status(build_id,'Success',config)
+        update_build_status(pipelines_build_id,'Success',config)
     } catch (all) {
-       update_build_status(build_id,'Failed',config)
+       update_build_status(pipelines_build_id,'Failed',config)
     }
 
   }
