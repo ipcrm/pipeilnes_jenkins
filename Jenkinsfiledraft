@@ -4,7 +4,7 @@ import groovy.json.JsonSlurper
 
 def config = [:]
 //Methods
-def set_env_stuff(config) {
+def set_env(config){
     env.GIT_AUTHOR_NAME = sh(returnStdout: true, script: "git --no-pager show -s --format='%an'").trim()
     def DISTELLI_USERNAME = config['user']
     def DISTELLI_API_URL = config['api_url']
