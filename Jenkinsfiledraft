@@ -114,18 +114,12 @@ node('pipelines') {
   }
 
   stage('build stuff'){
-    try {
-        create_push_event(config)
-        config['build_id'] = create_build_event(config)
+    create_push_event(config)
+    config['build_id'] = create_build_event(config)
 
-        // COMPILE/PACKAGE/WHATEVER
-        sh('distelli push -save-release release_version.out')
-        // END Compile
-
-        update_build_status(config['build_id'],'Success',config)
-    } catch (all) {
-       update_build_status(config['build_id'],'Failed',config)
-    }
-
+    // COMPILE/PACKAGE/WHATEVER
+    sh('distelli push -save-release release_version.out')
+    // END Compile
+    update_build_status(config['build_id'],'Success',config)
   }
 }
