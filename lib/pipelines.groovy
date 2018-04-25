@@ -75,6 +75,7 @@ def update_build_status(build_event_id,status,config){
   pushData('POST',config['api_url'],eventargs,eventdata)
 }
 
+@NonCPS
 def pushData (method,baseurl,args,payload) {
   def jsonSlurper = new JsonSlurper()
   def jsonbody = new JsonBuilder(payload)
