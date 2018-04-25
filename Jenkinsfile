@@ -15,12 +15,17 @@ node('pipelines') {
   }
 
   stage('build stuff'){
-    config['push_id'] = pipelines.create_push_event(config)
-    config['build_id'] = pipelines.create_build_event(config)
+    try {
+      config['push_id'] = pipelines.create_push_event(config)
+      config['build_id'] = pipelines.create_build_event(config)
 
-    // COMPILE/PACKAGE/WHATEVER
-    sh('distelli push -save-release release_version.out')
-    // END Compile
-    pipelines.update_build_status(config['build_id'],'Success',config)
+      // COMPILE/PACKAGE/WHATEVER
+      sh('distelli push -save-release release_version.out')
+      // END Compile
+
+      pipelines.update_build_status(config['build_id'],'Success',config)
+    } catch (all) {
+      pipelines.update_build_status(config['build_id'],'Failed',config)
+    }
   }
 }

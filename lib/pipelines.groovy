@@ -65,7 +65,10 @@ def update_build_status(build_event_id,status,config){
   def eventdata = [:]
   eventdata['build_status'] = status
   eventdata['build_end'] = DISTELLI_NOW
-  eventdata['release_version'] = sh(returnStdout: true, script:'cat release_version.out').trim()
+
+  if (fileExists('release_version.out')) {
+    eventdata['release_version'] = sh(returnStdout: true, script:'cat release_version.out').trim()
+  }
 
   def eventargs = "apps/${config['app_name']}/events/${build_event_id}?apiToken=${PIPELINES_API_TOKEN}"
   pushData('POST',config['api_url'],eventargs,eventdata)
