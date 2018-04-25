@@ -93,3 +93,5 @@ def pushData (method,baseurl,args,payload) {
     throw e
   }
 }
+
+return this;

@@ -6,7 +6,7 @@ import groovy.json.JsonSlurper
 def config = [:]
 
 node('pipelines') {
-  pipelines = load "lib/pipelines.groovy"
+  pipelines = load("lib/pipelines.groovy")
 
   config['user'] = 'ipcrm'
   config['api_url']  = "https://api.distelli.com/${config['user']}"
