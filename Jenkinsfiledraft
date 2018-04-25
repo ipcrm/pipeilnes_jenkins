@@ -2,11 +2,12 @@
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
-pipelines = load "${rootDir}@script/lib/pipelines.groovy "
 
 def config = [:]
 
 node('pipelines') {
+  pipelines = load "${rootDir}@script/lib/pipelines.groovy "
+
   config['user'] = 'ipcrm'
   config['api_url']  = "https://api.distelli.com/${config['user']}"
   config['app_name'] = "pipeilnes_jenkins"
