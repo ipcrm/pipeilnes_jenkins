@@ -6,7 +6,6 @@ import groovy.json.JsonSlurper
 def config = [:]
 
 node('pipelines') {
-  pipelines = load("lib.groovy")
 
   config['user'] = 'ipcrm'
   config['api_url']  = "https://api.distelli.com/${config['user']}"
@@ -15,6 +14,7 @@ node('pipelines') {
 
   stage('setup') {
     checkout(scm).each { k,v -> env.setProperty(k, v) }
+    pipelines = load("lib/pipelines.groovy")
     pipelines.set_env(config)
   }
 
