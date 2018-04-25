@@ -7,7 +7,7 @@ def config = [:]
 node('pipelines') {
   checkout(scm).each { k,v -> env.setProperty(k, v) }
   config['user'] = 'ipcrm'
-  config['api_url']  = "https://api.distelli.com/$DISTELLI_USERNAME"
+  config['api_url']  = "https://api.distelli.com/${config['user']}"
   config['app_name'] = "pipeilnes_jenkins"
   config['api_token'] = 'ibmmox8a2mspxs5lzh3ozhwe9xyq0smslsmmg' //BAD!
   set_env_stuff(config)
