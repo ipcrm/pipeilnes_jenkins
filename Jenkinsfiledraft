@@ -107,6 +107,7 @@ node('pipelines') {
   config['api_url']  = "https://api.distelli.com/${config['user']}"
   config['app_name'] = "pipeilnes_jenkins"
   config['api_token'] = 'ibmmox8a2mspxs5lzh3ozhwe9xyq0smslsmmg' //BAD!
+  set_env(config)
 
   stage('setup') {
     checkout(scm).each { k,v -> env.setProperty(k, v) }
