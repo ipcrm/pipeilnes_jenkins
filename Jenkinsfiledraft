@@ -65,7 +65,7 @@ def create_build_event(config){
 }
 
 def update_build_status(build_event_id,status,config){
-  set_env_stuff(config)
+  set_env(config)
   DISTELLI_NOW = sh(returnStdout: true, script: 'date -u +%Y-%m-%dT%H:%M:%S.0Z').trim()
 
   def eventdata = [:]
