@@ -89,6 +89,9 @@ def pushData (method,baseurl,args,payload) {
       consoleLogResponseBody: true,
       requestBody: jsonbody.toString()
     )
+
+    echo response.content
+    echo response.status
     if (response.status == 200) {
       return jsonSlurper.parseText(response.content);
     } else {
