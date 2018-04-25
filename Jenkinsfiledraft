@@ -19,6 +19,7 @@ def set_env(config){
     DISTELLI_BRANCH_NAME = env.GIT_BRANCH.split('/')[1]
     DISTELLI_CHANGE_TARGET = env.GIT_URL
     DISTELLI_CHANGE_URL = "${env.GIT_URL}/commits/${DISTELLI_CHANGE_ID}"
+    PIPELINES_API_TOKEN = config['api_token']
 }
 
 def create_push_event(config){
