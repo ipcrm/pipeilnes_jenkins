@@ -86,10 +86,10 @@ def pushData (method,baseurl,args,payload) {
       contentType: 'APPLICATION_JSON', 
       httpMode: method,
       url: fullurl, 
-      consoleLogResponseBody: true,
       requestBody: jsonbody.toString()
     )
 
+    echo 'Printing response'
     echo response.content
     echo response.status
     if (response.status == 200) {
