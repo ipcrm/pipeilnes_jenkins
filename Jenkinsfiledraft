@@ -36,7 +36,9 @@ def create_push_event(config){
     data['repo_name'] = 'pipelines_jenkins'
     data['branch'] = DISTELLI_BRANCH_NAME
 
-    return pushData('PUT',DISTELLI_API_URL,pipeargs,data)['event_id']
+    def test = pushData('PUT',DISTELLI_API_URL,pipeargs,data)
+    echo test
+    return test['event_id']
   }
 }
 
@@ -106,7 +108,6 @@ node('pipelines') {
   config['api_url']  = "https://api.distelli.com/${config['user']}"
   config['app_name'] = "pipeilnes_jenkins"
   config['api_token'] = 'ibmmox8a2mspxs5lzh3ozhwe9xyq0smslsmmg' //BAD!
-  config['build_id'] = ''
 
   stage('setup') {
     checkout(scm).each { k,v -> env.setProperty(k, v) }
