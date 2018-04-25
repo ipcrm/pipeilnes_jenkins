@@ -89,7 +89,11 @@ def pushData (method,baseurl,args,payload) {
       consoleLogResponseBody: true,
       requestBody: jsonbody.toString()
     )
-    return jsonSlurper.parseText(response);
+    if (response.status == 200) {
+      return jsonSlurper.parseText(response.content);
+    } else {
+      error("Failed ${method} to ${baseurl}! Got response code ${response.status}")
+    }
   } catch (Exception e) {
     throw e
   }
