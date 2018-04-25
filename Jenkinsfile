@@ -25,8 +25,9 @@ node('pipelines') {
       // END Compile
 
       pipelines.update_build_status(config['build_id'],'Success',config)
-    } catch (all) {
+    } catch (Exception e) {
       pipelines.update_build_status(config['build_id'],'Failed',config)
+      error("Failed to build! - ${e}")
     }
   }
 }
