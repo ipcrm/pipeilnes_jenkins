@@ -21,7 +21,7 @@ node('pipelines') {
 
       // COMPILE/PACKAGE/WHATEVER
       sh('distelli push -save-release release_version.out')
-      sh('exit 1')
+      throw
       // END Compile
 
       pipelines.update_build_status(config['build_id'],'Success',config)
