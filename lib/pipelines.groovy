@@ -72,7 +72,7 @@ def update_build_status(build_event_id,status,config){
   }
 
   def eventargs = "apps/${config['app_name']}/events/${build_event_id}?apiToken=${PIPELINES_API_TOKEN}"
-  pushData('POST',config['api_url'],eventargs,eventdata)
+  return pushData('POST',config['api_url'],eventargs,eventdata)
 }
 
 @NonCPS
