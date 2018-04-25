@@ -1,5 +1,6 @@
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import groovy.json.JsonBuilder
 
 def set_env(config){
     env.GIT_AUTHOR_NAME = sh(returnStdout: true, script: "git --no-pager show -s --format='%an'").trim()
@@ -76,20 +77,16 @@ def update_build_status(build_event_id,status,config){
 
 def pushData (method,baseurl,args,payload) {
   def jsonSlurper = new JsonSlurper()
+  def jsonbody = new JsonBuilder(payload)
   try {
     def fullurl = "${baseurl}/${args}"
-    def post = new URL(fullurl).openConnection();
-    post.setRequestMethod(method)
-    post.setDoOutput(true)
-    post.setRequestProperty("Content-Type", "application/json")
-    post.getOutputStream().write(JsonOutput.toJson(payload).getBytes("UTF-8"));
-    def postRC = post.getResponseCode();
-    if(postRC.equals(200)) {
-      def object = jsonSlurper.parseText(post.getInputStream().getText());
-      return object
-    }else{
-      error("POST to ${baseurl} failed! Response code ${postRC.toString()}")
-    }
+    def response = httpRequest(
+      contentType: 'APPLICATION_JSON_UTF8', 
+      httpMode: 'PUT', 
+      url: fullurl, 
+      requestBody: jsonbody.content
+    )
+    return jsonSlurper.parseText(response);
   } catch (Exception e) {
     throw e
   }
