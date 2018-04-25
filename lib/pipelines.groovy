@@ -81,6 +81,9 @@ def pushData (method,baseurl,args,payload) {
   def jsonbody = new JsonBuilder(payload)
 
   try {
+
+    echo jsonbody.toString()
+
     def fullurl = "${baseurl}/${args}"
     def response = httpRequest(
       contentType: 'APPLICATION_JSON', 
@@ -89,9 +92,6 @@ def pushData (method,baseurl,args,payload) {
       requestBody: jsonbody.toString()
     )
 
-    echo 'Printing response'
-    echo response.content
-    echo response.status
     if (response.status == 200) {
       return jsonSlurper.parseText(response.content);
     } else {
