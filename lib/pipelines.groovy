@@ -83,9 +83,9 @@ def pushData (method,baseurl,args,payload) {
   try {
 
     echo jsonbody.toString()
-
     def fullurl = "${baseurl}/${args}"
-    def response = httpRequest(
+
+    response = httpRequest(
       contentType: 'APPLICATION_JSON', 
       httpMode: method,
       url: fullurl, 
