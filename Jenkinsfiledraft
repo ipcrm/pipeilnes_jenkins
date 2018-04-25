@@ -31,7 +31,7 @@ node('pipelines') {
 //Methods
 def set_env_stuff(config) {
   env.GIT_AUTHOR_NAME = sh(returnStdout: true, script: "git --no-pager show -s --format='%an'").trim()
-  def DISTELLI_USERNMAE = config['user']
+  def DISTELLI_USERNAME = config['user']
   def DISTELLI_API_URL = config['api_url']
   def DISTELLI_APP_NAME = config['app_name']
   def DISTELLI_API_TOKEN = config['api_token']
